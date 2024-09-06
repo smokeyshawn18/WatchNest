@@ -4,19 +4,23 @@ import SearchIcon from "./assets/search.svg";
 import MovieCard from "./MovieCard";
 
 // API URL
-const API_URL = "http://www.omdbapi.com/?apikey=cbd4359e";
+const API_URL = "https://www.omdbapi.com/?apikey=cbd4359e";
 
 function App() {
   const [movies, setMovies] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
-  const [loading, setLoading] = useState(false);
 
   const searchMovie = async (title) => {
-    setLoading(true); // Start loading
-    const response = await fetch(`${API_URL}&s=${title}`);
-    const data = await response.json();
-    setMovies(data.Search || []); // Handle cases where `data.Search` is undefined
-    setLoading(false); // End loading
+    try {
+      const response = await fetch(`${API_URL}&s=${title}`);
+      if (!response.ok) {
+        throw new Error(`HTTP error! Status: ${response.status}`);
+      }
+      const data = await response.json();
+      setMovies(data.Search || []);
+    } catch (error) {
+      console.error("Error fetching movies:", error);
+    }
   };
 
   useEffect(() => {
@@ -26,7 +30,7 @@ function App() {
   return (
     <>
       <div className="app">
-        <h1>WatchNest - Search Movies Frequently</h1>
+        <h1>WatchNest</h1>
         <div className="search">
           <input
             type="text"
@@ -41,9 +45,7 @@ function App() {
           />
         </div>
 
-        {loading ? (
-          <div className="loading">Loading...</div>
-        ) : movies.length > 0 ? (
+        {movies.length > 0 ? (
           <div className="container">
             {movies.map((movie) => (
               <MovieCard
